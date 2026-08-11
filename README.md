@@ -2,7 +2,7 @@
 
 An interactive market intelligence dashboard tracking the economics of sustainable aviation fuel (SAF) relative to fossil jet fuel, built as a portfolio piece demonstrating sector expertise and quantitative analytical capability.
 
-**[Live dashboard →](https://george-brown2000.github.io/saf-market-dashboard)**
+**[Live dashboard →](https://george-brown2000.github.io/saf-jet-fuel-price-dashboard/)**
 
 ---
 
@@ -83,7 +83,7 @@ open index.html   # or serve with any static file server
 
 ## About
 
-Built by **George Brown** — process engineer with experience across CCUS, sustainable aviation fuel (Alcohol-to-Jet pathway), and LNG at Technip Energies and Anthesis. MEng Chemical Engineering, University of Nottingham (First Class Honours).
+Built by **George Brown** — process engineer with experience across CCUS, sustainable aviation fuel and asset decarbonisation at Technip Energies and Anthesis. MEng Chemical Engineering, University of Nottingham (First Class Honours).
 
 This dashboard is part of a broader portfolio demonstrating the intersection of technical sector knowledge and financial/commercial analysis in energy markets.
 
