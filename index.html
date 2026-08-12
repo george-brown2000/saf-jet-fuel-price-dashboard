@@ -357,6 +357,7 @@ function hideChartStatus() {
 // ── EIA FETCH ────────────────────────────────────────────────────────────────
 async function fetchEIAJetFuel() {
   showChartStatus('Loading Jet A-1 data from EIA…');
+  try {
     const url = `https://api.eia.gov/v2/seriesid/${EIA_SERIES_ID}?api_key=${EIA_API_KEY}&frequency=monthly&data%5B0%5D=value&sort%5B0%5D%5Bcolumn%5D=period&sort%5B0%5D%5Bdirection%5D=asc&start=2020-01&offset=0&length=200`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
