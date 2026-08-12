@@ -358,7 +358,7 @@ function hideChartStatus() {
 async function fetchEIAJetFuel() {
   showChartStatus('Loading Jet A-1 data from EIA…');
   try {
-    const url = `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=${EIA_API_KEY}&frequency=monthly&data%5B0%5D=value&facets%5Bproduct%5D%5B%5D=EPD2DXL0&sort%5B0%5D%5Bcolumn%5D=period&sort%5B0%5D%5Bdirection%5D=asc&start=2020-01&offset=0&length=200`;
+    const url = `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=${EIA_API_KEY}&frequency=monthly&data%5B0%5D=value&facets%5Bproduct%5D%5B%5D=EPJK&sort%5B0%5D%5Bcolumn%5D=period&sort%5B0%5D%5Bdirection%5D=asc&start=2020-01&offset=0&length=200`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const json = await resp.json();
