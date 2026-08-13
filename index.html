@@ -454,12 +454,12 @@ function updateKPIs() {
     const delta = prevJet !== undefined ? lastJet - prevJet : 0;
     document.getElementById('kpi-jet-delta').textContent = (delta >= 0 ? '+' : '') + delta + ' vs prev month';
   }
-  if (lastSaf !== undefined) {
-    document.getElementById('kpi-saf-val').textContent = '$' + lastSaf.toLocaleString();
-    const marginTxt = currentMargin > 0 ? ` + ${currentMargin}% margin` : ' (MSP floor)';
-    document.getElementById('kpi-saf-label').textContent = `${currentPathway} SAF MSP${marginTxt} ($/t)`;
-    document.getElementById('leg-saf-label').textContent = `${currentPathway} SAF MSP${marginTxt} $/t (IATA)`;
-  }
+  // if (lastSaf !== undefined) {
+  //   document.getElementById('kpi-saf-val').textContent = '$' + lastSaf.toLocaleString();
+  //   const marginTxt = currentMargin > 0 ? ` + ${currentMargin}% margin` : ' (MSP floor)';
+  //   document.getElementById('kpi-saf-label').textContent = `${currentPathway} SAF MSP${marginTxt} ($/t)`;
+  //   document.getElementById('leg-saf-label').textContent = `${currentPathway} SAF MSP${marginTxt} $/t (IATA)`;
+  // }
   if (lastSpread !== undefined) {
     document.getElementById('kpi-spread-val').textContent  = '$' + lastSpread.toLocaleString();
     document.getElementById('kpi-spread-delta').textContent = '↓ from $' + maxSpread.toLocaleString() + ' peak';
