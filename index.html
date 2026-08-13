@@ -134,8 +134,8 @@
 
 <div class="topbar">
   <span class="topbar-title">SAF / Jet Fuel Market Monitor</span>
-  <span class="topbar-sub">HEFA-SAF · Jet A-1 CIF NWE · UK ETS carbon · RTFO mandate · All prices in USD ($/t)</span>
-  <span class="topbar-badge">INDICATIVE DATA · UPDATED 2025</span>
+  <span class="topbar-sub"> SAF: HEFA/AtJ/FT/PtL · Jet A-1 · All prices in USD </span>
+  <span class="topbar-badge">INDICATIVE DATA · UPDATED 2026</span>
 </div>
 
 <div class="main">
@@ -144,18 +144,18 @@
   <div class="kpi-row">
     <div class="kpi">
       <div class="kpi-label">Jet A-1 ($/t)</div>
-      <div class="kpi-value" style="color:var(--jet)">$750</div>
-      <div class="kpi-delta">+30 vs prev period</div>
+      <div class="kpi-value" id="kpi-jet-val" style="color:var(--jet)">-</div>
+      <div class="kpi-delta" id="kpi-jet-delta">loading...</div>
     </div>
     <div class="kpi">
       <div class="kpi-label" id="kpi-saf-label">HEFA SAF MSP + 0% margin ($/t)</div>
-      <div class="kpi-value" style="color:var(--saf)">$1,950</div>
-      <div class="kpi-delta up">+50 vs prev period</div>
+      <div class="kpi-value" id="kpi-saf-val" style="color:var(--saf)">-</div>
+      <div class="kpi-delta up" id="kpi-saf-delta">indicative</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">SAF premium ($/t)</div>
-      <div class="kpi-value" style="color:var(--spread)">$1,200</div>
-      <div class="kpi-delta down">↓ from $1,810 peak (Jul 22)</div>
+      <div class="kpi-value" id="kpi-spread-val"style="color:var(--spread)">-</div>
+      <div class="kpi-delta down" id="kpi-spread-delta">-</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">UK ETS carbon ($/t CO₂)</div>
@@ -183,7 +183,7 @@
     </div>
     <div class="margin-control">
       <span class="margin-label">Producer margin above MSP:</span>
-      <input type="range" id="marginSlider" min="0" max="50" step="5" value="0" oninput="setMargin(this.value)">
+      <input type="range" id="marginSlider" min="0" max="25" step="5" value="0" oninput="setMargin(this.value)">
       <span class="margin-val" id="marginDisplay">0%</span>
       <span class="margin-label" style="color:var(--text-muted);font-size:10px">(0% = IATA MSP floor · 10–20% = typical project return)</span>
     </div>
@@ -278,7 +278,7 @@
   <div class="footer">
     <strong>Data sources & methodology</strong><br>
     All prices in USD ($/t). UK ETS carbon price converted from GBP at a fixed rate of 1.27 USD/GBP for consistency. Jet A-1 prices: US EIA kerosene-type jet fuel spot price (series EER_EPJK_PF4_RGC_DPG), converted to $/t using assumed density of 800 kg/m³. SAF prices: IATA Average Minimum Selling Price (MSP) by pathway (HEFA, AtJ, FT, PtL), linearly interpolated between 5-year anchor points 2020–2045. MSP represents the production cost floor; actual traded prices may be higher. Producer margin is user-configurable. UK ETS carbon price: ICE auction results and secondary market data, converted to USD. RTFO mandate trajectory: UK Department for Transport RTFO statistics and SAF mandate statutory instruments. Scenario projections are model-based estimates using documented assumptions; they are not forecasts.<br><br>
-    Built by George Brown · Chemical engineer, CCUS/SAF/LNG · <a href="https://linkedin.com/in/george-brown2000" target="_blank">LinkedIn</a> · <a href="https://github.com/george-brown2000" target="_blank">GitHub</a>
+    Built by George Brown · Chemical Engineer, CCUS/SAF/Industrial Decarbonisation · <a href="https://linkedin.com/in/george-brown2000" target="_blank">LinkedIn</a> · <a href="https://github.com/george-brown2000" target="_blank">GitHub</a>
   </div>
 
 </div>
@@ -381,7 +381,7 @@ function showChartStatus(msg, isError = false) {
   if (!el) {
     el = document.createElement('div');
     el.id = 'chartStatus';
-    el.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;text-align:center;pointer-events:none;';
+    el.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;text-align:center;pointer-events:none;line-height:1.6;';
     wrap.appendChild(el);
   }
   el.style.color = isError ? '#f87171' : '#5c6470';
