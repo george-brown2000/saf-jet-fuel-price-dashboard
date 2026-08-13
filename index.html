@@ -74,13 +74,13 @@
   .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
   .ctrl-btn.active { background: rgba(74,158,202,0.15); border-color: var(--accent); color: var(--accent); }
 
-  .margin-control { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  /* .margin-control { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
   .margin-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
   .margin-val { font-size: 12px; font-weight: 600; color: var(--saf); min-width: 36px; font-variant-numeric: tabular-nums; }
   input[type=range] { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--border-strong); outline: none; cursor: pointer; width: 140px; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--saf); cursor: pointer; border: 2px solid var(--navy); }
   .pathway-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-  .pathway-label { font-size: 11px; color: var(--text-muted); margin-right: 2px; }
+  .pathway-label { font-size: 11px; color: var(--text-muted); margin-right: 2px; } */
 
   .legend { display: flex; gap: 20px; margin-bottom: 10px; flex-wrap: wrap; }
   .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
@@ -148,7 +148,7 @@
       <div class="kpi-delta" id="kpi-jet-delta">loading...</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label" id="kpi-saf-label">HEFA SAF MSP + 0% margin ($/t)</div>
+      <div class="kpi-label">HEFA SAF MSP + 0% margin ($/t)</div>
       <div class="kpi-value" id="kpi-saf-val" style="color:var(--saf)">-</div>
       <div class="kpi-delta up" id="kpi-saf-delta">indicative</div>
     </div>
@@ -181,7 +181,7 @@
       <button class="ctrl-btn" onclick="setPathway('FT',this)">FT</button>
       <button class="ctrl-btn" onclick="setPathway('PtL',this)">PtL</button>
     </div>
-    <div class="margin-control">
+    <!-- <div class="margin-control">
       <span class="margin-label">Producer margin above MSP:</span>
       <input type="range" id="marginSlider" min="0" max="25" step="5" value="0" oninput="setMargin(this.value)">
       <span class="margin-val" id="marginDisplay">0%</span>
@@ -192,7 +192,7 @@
       <button class="ctrl-btn active" id="viewBtn-both" onclick="setPriceView('both',this)">Prices + spread</button>
       <button class="ctrl-btn" id="viewBtn-spread" onclick="setPriceView('spread',this)">Spread only</button>
       <button class="ctrl-btn" id="viewBtn-carbon" onclick="setPriceView('carbon',this)">Carbon overlay</button>
-    </div>
+    </div> -->
     <div class="legend">
       <div class="leg-item"><div class="leg-dot" style="background:var(--jet)"></div>Jet A-1 $/t (EIA live)</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--saf)"></div><span id="leg-saf-label">HEFA SAF MSP $/t (IATA)</span></div>
@@ -328,13 +328,12 @@ function interpolateMSP(pathway, period) {
 }
 
 // Build a period→price lookup for a given pathway and producer margin %
-function buildSAFMap(pathway, marginPct) {
-  const factor = 1 + marginPct / 100;
+function buildSAFMap(pathway) {
   const map = {};
   for (let y = 2020; y <= 2045; y++) {
     for (let mo = 1; mo <= 12; mo++) {
       const p = `${y}-${String(mo).padStart(2,'0')}`;
-      map[p] = Math.round(interpolateMSP(pathway, p) * factor);
+      map[p] = interpolateMSP(pathway, p);
     }
   }
   return map;
@@ -343,13 +342,10 @@ function buildSAFMap(pathway, marginPct) {
 // ── SHARED STATE ──────────────────────────────────────────────────────────────
 let LABELS = [], JET = [], SAF = [], SPREAD = [];
 let currentPathway = 'HEFA';  // active SAF pathway
-let currentMargin  = 0;       // producer margin % above IATA MSP
+// let currentMargin  = 0;       // producer margin % above IATA MSP
 
 // UK ETS carbon price (GBP × 1.27 → USD), monthly from Jan 2019
 const CARBON_MONTHLY = [
-  {p:'2019-01',v:19},{p:'2019-02',v:20},{p:'2019-03',v:21},{p:'2019-04',v:21},
-  {p:'2019-05',v:22},{p:'2019-06',v:22},{p:'2019-07',v:22},{p:'2019-08',v:21},
-  {p:'2019-09',v:20},{p:'2019-10',v:19},{p:'2019-11',v:18},{p:'2019-12',v:18},
   {p:'2020-01',v:17},{p:'2020-02',v:16},{p:'2020-03',v:14},{p:'2020-04',v:13},
   {p:'2020-05',v:14},{p:'2020-06',v:15},{p:'2020-07',v:16},{p:'2020-08',v:17},
   {p:'2020-09',v:17},{p:'2020-10',v:17},{p:'2020-11',v:18},{p:'2020-12',v:19},
@@ -402,8 +398,8 @@ function formatLabel(period) {
 
 async function fetchEIAJetFuel() {
   showChartStatus('Loading Jet A-1 data from EIA…');
-  const url = `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=${EIA_API_KEY}&frequency=monthly&data%5B0%5D=value&facets%5Bproduct%5D%5B%5D=EPJK&sort%5B0%5D%5Bcolumn%5D=period&sort%5B0%5D%5Bdirection%5D=asc&start=2020-01&offset=0&length=200`;
   try {
+    const url = `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=${EIA_API_KEY}&frequency=monthly&data%5B0%5D=value&facets%5Bproduct%5D%5B%5D=EPJK&sort%5B0%5D%5Bcolumn%5D=period&sort%5B0%5D%5Bdirection%5D=asc&start=2020-01&offset=0&length=200`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`EIA API returned HTTP ${resp.status}`);
     const json = await resp.json();
@@ -417,7 +413,7 @@ async function fetchEIAJetFuel() {
 
     LABELS = valid.map(r => formatLabel(r.period));
     JET    = valid.map(r => r.jet);
-    SAF    = valid.map(r => buildSAFMap(currentPathway, currentMargin)[r.period] ?? null);
+    SAF    = valid.map(r => buildSAFMap(currentPathway)[r.period] ?? null);
     SPREAD = valid.map((r, i) => SAF[i] !== null ? SAF[i] - r.jet : null);
 
     hideChartStatus();
@@ -427,14 +423,14 @@ async function fetchEIAJetFuel() {
     // Update aria label with actual date range
     const first = valid[0].period, last = valid[valid.length - 1].period;
     document.getElementById('priceChart').setAttribute('aria-label',
-      `Time series of Jet A-1 (EIA live data) and HEFA SAF prices ${first} to ${last}. All values $/t.`);
+      `Time series of Jet A-1 (EIA live data) and ${currentPathway} SAF prices ${first} to ${last}. All values $/t.`);
 
   } catch (err) {
     console.error('EIA fetch error:', err);
     showChartStatus(`Could not load EIA data: ${err.message}.\nUsing cached indicative values.`, true);
     // Graceful fallback to cached indicative Jet A-1 values aligned to SAF dates
     // Fallback: use IATA MSP interpolation with indicative jet ratio
-    const safMap = buildSAFMap(currentPathway, currentMargin);
+    const safMap = buildSAFMap(currentPathway);
     const periods = Object.keys(safMap).sort().filter(p => p >= '2020-01');
     LABELS = periods.map(formatLabel);
     SAF    = periods.map(p => safMap[p]);
@@ -554,16 +550,16 @@ function setPathway(pathway, btn) {
 }
 
 // Rebuild SAF + SPREAD arrays and redraw when margin changes
-function setMargin(val) {
-  currentMargin = parseInt(val);
-  document.getElementById('marginDisplay').textContent = val + '%';
-  rebuildSAFAndRedraw();
+// function setMargin(val) {
+//   currentMargin = parseInt(val);
+//   document.getElementById('marginDisplay').textContent = val + '%';
+//   rebuildSAFAndRedraw();
 }
 
 // Shared rebuild: recalculate SAF and SPREAD from current EIA JET data, then redraw
 function rebuildSAFAndRedraw() {
   if (JET.length === 0) return; // data not loaded yet
-  const safMap = buildSAFMap(currentPathway, currentMargin);
+  const safMap = buildSAFMap(currentPathway);
   // Reconstruct periods from LABELS (Mon YY → YYYY-MM)
   const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   SAF    = LABELS.map(lbl => {
