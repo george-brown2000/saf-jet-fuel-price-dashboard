@@ -525,7 +525,7 @@ function buildPriceChart(view) {
           },
           grid: { color: GRID }
         },
-        y: { ticks: { color: TICK, font: { size: 10 }, callback: v => '$' + v }, grid: { color: GRID } },
+        y: { max: 3000, ticks: { color: TICK, font: { size: 10 }, callback: v => '$' + v }, grid: { color: GRID } },
         ...(showY2 ? { y2: { ticks: { color: '#9b8fef', font: { size: 10 }, callback: v => '$' + v }, grid: { display: false }, position: 'right' } } : {})
       }
     }
