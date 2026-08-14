@@ -518,38 +518,127 @@ function buildPriceDatasets(view) {
 
 function buildPriceChart(view) {
   if (priceChart) priceChart.destroy();
+
   const showY2 = view === 'carbon';
   document.getElementById('leg-carbon').style.display = showY2 ? 'flex' : 'none';
 
-  // Show every 6th label to avoid crowding on monthly data
+  // Show approximately 14 date labels to avoid crowding
   const tickStep = Math.max(1, Math.floor(LABELS.length / 14));
+
+  // Determine the data currently being displayed
+  const datasets = buildPriceDatasets(view);
+
+  // Collect all visible Y-axis values
+  const yValues = [];
+
+  datasets.forEach(ds => {
+    // Carbon has its own Y2 axis
+    if (ds.yAxisID === 'y2') return;
+
+    ds.data.forEach(value => {
+      if (value !== null && Number.isFinite(value)) {
+        yValues.push(value);
+      }
+    });
+  });
+
+  // Calculate sensible Y-axis limits from the actual data
+  const minValue = yValues.length ? Math.min(...yValues) : 0;
+  const maxValue = yValues.length ? Math.max(...yValues) : 3000;
+
+  // Add 10% padding above and below the data range
+  const range = maxValue - minValue;
+  const padding = range > 0 ? range * 0.10 : maxValue * 0.10;
+
+  const yMin = Math.max(0, Math.floor((minValue - padding) / 100) * 100);
+  const yMax = Math.ceil((maxValue + padding) / 100) * 100;
 
   priceChart = new Chart(document.getElementById('priceChart'), {
     type: 'line',
-    data: { labels: LABELS, datasets: buildPriceDatasets(view) },
+
+    data: {
+      labels: LABELS,
+      datasets: datasets
+    },
+
     options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 350 },
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 350 },
+
       plugins: {
         legend: { display: false },
+
         tooltip: {
-          mode: 'index', intersect: false,
-          backgroundColor: '#0f1e36', borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1,
-          titleColor: '#9ba3af', bodyColor: '#f0f0ef',
+          mode: 'index',
+          intersect: false,
+
+          backgroundColor: '#0f1e36',
+          borderColor: 'rgba(255,255,255,0.15)',
+          borderWidth: 1,
+
+          titleColor: '#9ba3af',
+          bodyColor: '#f0f0ef',
+
           callbacks: {
-            label: c => c.parsed.y !== null ? '$' + c.parsed.y.toFixed(0) + '/t' : 'n/a'
+            label: c =>
+              c.parsed.y !== null
+                ? '$' + c.parsed.y.toFixed(0) + '/t'
+                : 'n/a'
           }
         }
       },
+
       scales: {
         x: {
           ticks: {
-            color: TICK, font: { size: 10 }, maxRotation: 45,
-            callback: (val, idx) => idx % tickStep === 0 ? LABELS[idx] : ''
+            color: TICK,
+            font: { size: 10 },
+            maxRotation: 45,
+
+            callback: (val, idx) =>
+              idx % tickStep === 0 ? LABELS[idx] : ''
           },
-          grid: { color: GRID }
+
+          grid: {
+            color: GRID
+          }
         },
-        y: { max: 3000, ticks: { color: TICK, font: { size: 10 }, callback: v => '$' + v }, grid: { color: GRID } },
-        ...(showY2 ? { y2: { ticks: { color: '#9b8fef', font: { size: 10 }, callback: v => '$' + v }, grid: { display: false }, position: 'right' } } : {})
+
+        // Main price axis
+        y: {
+          min: yMin,
+          max: yMax,
+
+          ticks: {
+            color: TICK,
+            font: { size: 10 },
+
+            callback: v => '$' + v.toLocaleString()
+          },
+
+          grid: {
+            color: GRID
+          }
+        },
+
+        // Secondary axis for UK ETS
+        ...(showY2 ? {
+          y2: {
+            ticks: {
+              color: '#9b8fef',
+              font: { size: 10 },
+
+              callback: v => '$' + v.toLocaleString()
+            },
+
+            grid: {
+              display: false
+            },
+
+            position: 'right'
+          }
+        } : {})
       }
     }
   });
