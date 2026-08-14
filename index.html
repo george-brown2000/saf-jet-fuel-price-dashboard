@@ -422,6 +422,8 @@ function formatLabel(period) {
   return months[parseInt(m) - 1] + ' ' + y.slice(2);
 }
 
+function labelToPeriod(lbl){const[m,y]=lbl.split(' ');return'20'+y+'-'+MON[m];}
+
 async function fetchEIAJetFuel() {
   showChartStatus('Loading Jet A-1 data from EIA…');
   try {
