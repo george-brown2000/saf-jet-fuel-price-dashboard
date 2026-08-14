@@ -148,7 +148,7 @@
       <div class="kpi-delta" id="kpi-jet-delta">loading...</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">HEFA SAF MSP + 0% margin ($/t)</div>
+      <div class="kpi-label">HEFA SAF MSP ($/t)</div>
       <div class="kpi-value" id="kpi-saf-val" style="color:var(--saf)">-</div>
       <div class="kpi-delta up" id="kpi-saf-delta">indicative</div>
     </div>
@@ -186,13 +186,13 @@
       <input type="range" id="marginSlider" min="0" max="25" step="5" value="0" oninput="setMargin(this.value)">
       <span class="margin-val" id="marginDisplay">0%</span>
       <span class="margin-label" style="color:var(--text-muted);font-size:10px">(0% = IATA MSP floor · 10–20% = typical project return)</span>
-    </div>
+    </div> -->
     <div class="controls" style="margin-top:10px">
       <span class="ctrl-label">View:</span>
       <button class="ctrl-btn active" id="viewBtn-both" onclick="setPriceView('both',this)">Prices + spread</button>
       <button class="ctrl-btn" id="viewBtn-spread" onclick="setPriceView('spread',this)">Spread only</button>
       <button class="ctrl-btn" id="viewBtn-carbon" onclick="setPriceView('carbon',this)">Carbon overlay</button>
-    </div> -->
+    </div>
     <div class="legend">
       <div class="leg-item"><div class="leg-dot" style="background:var(--jet)"></div>Jet A-1 $/t (EIA live)</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--saf)"></div><span id="leg-saf-label">HEFA SAF MSP $/t (IATA)</span></div>
@@ -328,7 +328,9 @@ function interpolateMSP(pathway, period) {
 }
 
 // Build a period→price lookup for a given pathway and producer margin %
+const SAF_CACHE = {};
 function buildSAFMap(pathway) {
+  if (SAF_CACHE[pathway]) return SAF_CACHE[pathway];
   const map = {};
   for (let y = 2020; y <= 2045; y++) {
     for (let mo = 1; mo <= 12; mo++) {
@@ -454,12 +456,12 @@ function updateKPIs() {
     const delta = prevJet !== undefined ? lastJet - prevJet : 0;
     document.getElementById('kpi-jet-delta').textContent = (delta >= 0 ? '+' : '') + delta + ' vs prev month';
   }
-  // if (lastSaf !== undefined) {
-  //   document.getElementById('kpi-saf-val').textContent = '$' + lastSaf.toLocaleString();
+  if (lastSaf !== undefined) {
+    document.getElementById('kpi-saf-val').textContent = '$' + lastSaf.toLocaleString();
   //   const marginTxt = currentMargin > 0 ? ` + ${currentMargin}% margin` : ' (MSP floor)';
-  //   document.getElementById('kpi-saf-label').textContent = `${currentPathway} SAF MSP${marginTxt} ($/t)`;
-  //   document.getElementById('leg-saf-label').textContent = `${currentPathway} SAF MSP${marginTxt} $/t (IATA)`;
-  // }
+    document.getElementById('kpi-saf-label').textContent = `${currentPathway} SAF MSP ($/t)`;
+    document.getElementById('leg-saf-label').textContent = `${currentPathway} SAF MSP $/t (IATA)`;
+  }
   if (lastSpread !== undefined) {
     document.getElementById('kpi-spread-val').textContent  = '$' + lastSpread.toLocaleString();
     document.getElementById('kpi-spread-delta').textContent = '↓ from $' + maxSpread.toLocaleString() + ' peak';
