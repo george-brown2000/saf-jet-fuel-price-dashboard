@@ -439,7 +439,7 @@ async function fetchEIAJetFuel() {
 
     LABELS = valid.map(r => formatLabel(r.period));
     JET    = valid.map(r => r.jet);
-    SAF    = valid.map(r => SAF_MAP[currentPathway][r.period] ?? null);
+    SAF    = valid.map(r => SAF_MAPS[currentPathway][r.period] ?? null);
     SPREAD = valid.map((r, i) => SAF[i] !== null ? SAF[i] - r.jet : null);
 
     hideChartStatus();
