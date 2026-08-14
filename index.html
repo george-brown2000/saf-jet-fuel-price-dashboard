@@ -332,7 +332,7 @@ const SAF_CACHE = {};
 function buildSAFMap(pathway) {
   if (SAF_CACHE[pathway]) return SAF_CACHE[pathway];
   const map = {};
-  for (let y = 2020; y <= 2045; y++) {
+  for (let y = 2020; y <= 2026; y++) {
     for (let mo = 1; mo <= 12; mo++) {
       const p = `${y}-${String(mo).padStart(2,'0')}`;
       map[p] = interpolateMSP(pathway, p);
