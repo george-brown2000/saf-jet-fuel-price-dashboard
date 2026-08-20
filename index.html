@@ -22,29 +22,11 @@
     --accent: #4a9eca;
     --radius: 6px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: var(--navy);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
+  body {background: var(--navy); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.5; min-height: 100vh; }
 
-  .topbar {
-    background: var(--navy-mid);
-    border-bottom: 1px solid var(--border-strong);
-    padding: 14px 28px;
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+  .topbar {background: var(--navy-mid); border-bottom: 1px solid var(--border-strong); padding: 14px 28px; display: flex; align-items: baseline; gap: 16px; position: sticky; top: 0; z-index: 10;}
   .topbar-title { font-size: 15px; font-weight: 600; color: var(--text-primary); letter-spacing: 0.01em; }
   .topbar-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.02em; }
   .topbar-badge { margin-left: auto; font-size: 10px; color: var(--text-muted); border: 1px solid var(--border-strong); border-radius: 4px; padding: 2px 8px; letter-spacing: 0.04em; }
@@ -120,14 +102,7 @@
   .footer a { color: var(--accent); text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
 
-  @media (max-width: 700px) {
-    .main { padding: 16px; }
-    .kpi-row { grid-template-columns: 1fr 1fr; }
-    .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 4px; }
-    .topbar-badge { margin-left: 0; }
-    .tab { padding: 8px 12px; font-size: 11px; }
-    .wf-label { width: 100px; font-size: 10px; }
-  }
+  @media (max-width: 700px) {.main { padding: 16px; } .kpi-row { grid-template-columns: 1fr 1fr; } .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 4px; } .topbar-badge { margin-left: 0; } .tab { padding: 8px 12px; font-size: 11px; } .wf-label { width: 100px; font-size: 10px; }}
 </style>
 </head>
 <body>
@@ -296,7 +271,22 @@ const JET_DENSITY_KG_PER_M3 = 800;          // kg/m³  ← configurable
 // Derived conversion: 1 US gallon = 3.78541 litres = 0.00378541 m³
 // Mass per gallon (kg) = density × volume = JET_DENSITY_KG_PER_M3 × 0.00378541
 // Gallons per metric tonne = 1000 / mass_per_gallon
-const GALLONS_PER_TONNE = 1000 / (JET_DENSITY_KG_PER_M3 * 0.00378541);
+const GALLONS_PER_TONNE = 1000 / (JET_DENSITY_KG_PER_M3 * 0.00378541); // ~330.6 gallons per tonne
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function periodToLabel(p) {
+  // 'YYYY-MM' → 'Mon YY'
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [y, m] = p.split('-');
+  return months[parseInt(m, 10) - 1] + ' ' + y.slice(2);
+}
+
+function labelToPeriod(lbl) {
+  // 'Mon YY' → 'YYYY-MM'
+  const mo = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  const [m, y] = lbl.split(' ');
+  return '20' + y + '-' + mo[m];
+}
 
 // ── SAF MSP LOOKUP TABLES ────────────────────────────────────────────────────
 // Source: IATA Average Minimum Selling Price ($/tonne), linearly interpolated
@@ -361,328 +351,250 @@ const PtL_MAP = {
 
 const SAF_MAPS = { HEFA: HEFA_MAP, AtJ: AtJ_MAP, FT: FT_MAP, PtL: PtL_MAP };
 
-function getSAFPrice(pathway, period) {
-  return SAF_MAPS[pathway]?.[period] ?? null;
-}
+const PATHWAY_NOTES = {
+  HEFA: 'HEFA (Hydroprocessed Esters & Fatty Acids) — lowest-cost mature pathway, primarily UCO/tallow feedstock',
+  AtJ:  'AtJ (Alcohol-to-Jet) — converts ethanol or other alcohols; cost declining as scale increases',
+  FT:   'FT (Fischer-Tropsch) — gasification of biomass/waste; high capital cost, significant cost reduction projected',
+  PtL:  'PtL (Power-to-Liquid) — electrolytic hydrogen + captured CO₂; highest cost, longest development horizon',
+};
 
-// ── SHARED STATE ──────────────────────────────────────────────────────────────
-let LABELS = [], JET = [], SAF = [], SPREAD = [];
-let currentPathway = 'HEFA';  // active SAF pathway
-// let currentMargin  = 0;       // producer margin % above IATA MSP
-
-// UK ETS carbon price (GBP × 1.27 → USD), monthly from Jan 2019
-const CARBON_MONTHLY = [
-  {p:'2020-01',v:17},{p:'2020-02',v:16},{p:'2020-03',v:14},{p:'2020-04',v:13},
-  {p:'2020-05',v:14},{p:'2020-06',v:15},{p:'2020-07',v:16},{p:'2020-08',v:17},
-  {p:'2020-09',v:17},{p:'2020-10',v:17},{p:'2020-11',v:18},{p:'2020-12',v:19},
-  {p:'2021-01',v:21},{p:'2021-02',v:26},{p:'2021-03',v:33},{p:'2021-04',v:38},
-  {p:'2021-05',v:41},{p:'2021-06',v:44},{p:'2021-07',v:52},{p:'2021-08',v:57},
-  {p:'2021-09',v:62},{p:'2021-10',v:67},{p:'2021-11',v:72},{p:'2021-12',v:77},
-  {p:'2022-01',v:82},{p:'2022-02',v:86},{p:'2022-03',v:92},{p:'2022-04',v:98},
-  {p:'2022-05',v:101},{p:'2022-06',v:103},{p:'2022-07',v:104},{p:'2022-08',v:98},
-  {p:'2022-09',v:88},{p:'2022-10',v:82},{p:'2022-11',v:76},{p:'2022-12',v:72},
-  {p:'2023-01',v:75},{p:'2023-02',v:76},{p:'2023-03',v:74},{p:'2023-04',v:70},
-  {p:'2023-05',v:68},{p:'2023-06',v:65},{p:'2023-07',v:64},{p:'2023-08',v:63},
-  {p:'2023-09',v:62},{p:'2023-10',v:61},{p:'2023-11',v:60},{p:'2023-12',v:59},
-  {p:'2024-01',v:58},{p:'2024-02',v:56},{p:'2024-03',v:54},{p:'2024-04',v:52},
-  {p:'2024-05',v:51},{p:'2024-06',v:50},{p:'2024-07',v:49},{p:'2024-08',v:48},
-  {p:'2024-09',v:47},{p:'2024-10',v:46},{p:'2024-11',v:45},{p:'2024-12',v:44},
-  {p:'2025-01',v:44},{p:'2025-02',v:43},{p:'2025-03',v:43},{p:'2025-04',v:42},
-  {p:'2025-05',v:42},{p:'2025-06',v:41},{p:'2025-07',v:41},{p:'2025-08',v:40},
-  {p:'2025-09',v:40},{p:'2025-10',v:39},{p:'2025-11',v:39},{p:'2025-12',v:38},
-];
-const CARBON_MAP = Object.fromEntries(CARBON_MONTHLY.map(d => [d.p, d.v]));
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let LABELS   = [];   // 'Mon YY' strings from EIA
+let PERIODS  = [];   // 'YYYY-MM' strings from EIA
+let JET      = [];   // $/t converted from EIA $/gal
+let SAF      = [];   // $/t from IATA MSP lookup
+let SPREAD   = [];   // SAF - JET
+let currentPathway = 'HEFA';
+let currentView    = 'both';
+let chart          = null;
 
 const GRID = 'rgba(255,255,255,0.06)';
 const TICK = '#5c6470';
 
-// ── EIA FETCH ─────────────────────────────────────────────────────────────────
-function showChartStatus(msg, isError = false) {
-  const wrap = document.getElementById('priceChartWrap');
-  let el = document.getElementById('chartStatus');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'chartStatus';
-    el.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;text-align:center;pointer-events:none;line-height:1.6;';
-    wrap.appendChild(el);
-  }
-  el.style.color = isError ? '#f87171' : '#5c6470';
-  el.textContent = msg;
-}
-
-function hideChartStatus() {
+// ── STATUS OVERLAY ────────────────────────────────────────────────────────────
+function setStatus(msg, isError) {
   const el = document.getElementById('chartStatus');
-  if (el) el.remove();
+  el.textContent = msg;
+  el.style.color = isError ? '#f87171' : '#5c6470';
+  el.style.display = msg ? '' : 'none';
 }
 
-function formatLabel(p) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const [y, m] = p.split('-');
-  return months[parseInt(m) - 1] + ' ' + y.slice(2);
-}
-
-function labelToPeriod(lbl){
-  const months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-  const[m,y]=lbl.split(' ');
-  return'20'+y+'-'+months[m];
-}
-
-async function fetchEIAJetFuel() {
-  showChartStatus('Loading Jet A-1 data from EIA…');
+// ── EIA FETCH ─────────────────────────────────────────────────────────────────
+async function fetchEIA() {
+  setStatus('Loading Jet A-1 data from EIA…', false);
   try {
-    const url = `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=${EIA_API_KEY}&frequency=monthly&data%5B0%5D=value&facets%5Bproduct%5D%5B%5D=EPJK&sort%5B0%5D%5Bcolumn%5D=period&sort%5B0%5D%5Bdirection%5D=asc&start=2020-01&offset=0&length=200`;
+    const url = 'https://api.eia.gov/v2/petroleum/pri/spt/data/'
+      + '?api_key=' + EIA_API_KEY
+      + '&frequency=monthly'
+      + '&data%5B0%5D=value'
+      + '&facets%5Bproduct%5D%5B%5D=EPJK'
+      + '&sort%5B0%5D%5Bcolumn%5D=period'
+      + '&sort%5B0%5D%5Bdirection%5D=asc'
+      + '&start=2020-01'
+      + '&offset=0'
+      + '&length=200';
+
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`EIA API returned HTTP ${resp.status}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const json = await resp.json();
-    const rows = json?.response?.data;
-    if (!rows || rows.length === 0) throw new Error('No data returned from EIA');
+    const rows = json && json.response && json.response.data;
+    if (!rows || rows.length === 0) throw new Error('No data returned');
 
-    // Filter to valid rows and convert $/gal → $/t
-    const valid = rows
-      .filter(r => r.period && r.value !== null && r.value !== undefined)
-      .map(r => ({ period: r.period, jet: Math.round(parseFloat(r.value) * GALLONS_PER_TONNE) }));
+    // Build arrays from EIA response
+    const valid = rows.filter(function(r) {
+      return r.period && r.value !== null && r.value !== undefined;
+    });
 
-    LABELS = valid.map(r => formatLabel(r.period));
-    JET    = valid.map(r => r.jet);
-    SAF    = valid.map(r => SAF_MAPS[currentPathway][r.period] ?? null);
-    SPREAD = valid.map((r, i) => SAF[i] !== null ? SAF[i] - r.jet : null);
+    PERIODS = valid.map(function(r) { return r.period; });
+    LABELS  = PERIODS.map(periodToLabel);
+    JET     = valid.map(function(r) {
+      return Math.round(parseFloat(r.value) * GALLONS_PER_TONNE);
+    });
 
-    hideChartStatus();
+    buildSAFandSpread();
+    setStatus('', false);
     updateKPIs();
-    buildPriceChart(currentView);
+    drawChart();
 
-    // Update aria label with actual date range
-    const first = valid[0].period, last = valid[valid.length - 1].period;
-    document.getElementById('priceChart').setAttribute('aria-label',
-      `Time series of Jet A-1 (EIA live data) and ${currentPathway} SAF prices ${first} to ${last}. All values $/t.`);
-
- } catch (err) {
+  } catch (err) {
     console.warn('EIA fetch failed:', err.message);
-    showChartStatus('Could not load EIA data: ' + err.message + '\nUsing IATA MSP with indicative Jet A-1 values.', true);
-    const periods = Object.keys(HEFA_MAP);
-    LABELS = periods.map(formatLabel);
-    SAF    = periods.map(p => SAF_MAPS[currentPathway][p]);
-    JET    = periods.map(() => 750);
-    SPREAD = SAF.map((s, i) => s - JET[i]);
+    setStatus('Could not load EIA data: ' + err.message + '\nShowing IATA MSP only (no Jet A-1 comparison).', true);
+    // Fallback: use HEFA map periods, flat indicative jet
+    PERIODS = Object.keys(HEFA_MAP);
+    LABELS  = PERIODS.map(periodToLabel);
+    JET     = PERIODS.map(function() { return 750; });
+    buildSAFandSpread();
     updateKPIs();
-    buildPriceChart(currentView);
-  } 
+    drawChart();
+  }
 }
 
-function updateKPIs() {
-  // Find last non-null values
-  const lastJet    = [...JET].reverse().find(v => v !== null);
-  const prevJet    = [...JET].reverse().find((v, i) => i > 0 && v !== null);
-  const lastSaf    = [...SAF].reverse().find(v => v !== null);
-  const lastSpread = [...SPREAD].reverse().find(v => v !== null);
-  const maxSpread  = Math.max(...SPREAD.filter(v => v !== null));
+// Build SAF and SPREAD from current PERIODS and JET
+function buildSAFandSpread() {
+  var map = SAF_MAPS[currentPathway];
+  SAF    = PERIODS.map(function(p) { return map[p] !== undefined ? map[p] : null; });
+  SPREAD = PERIODS.map(function(p, i) {
+    var s = SAF[i], j = JET[i];
+    return (s !== null && j !== null) ? s - j : null;
+  });
+}
 
-  if (lastJet !== undefined) {
+// ── KPI CARDS ─────────────────────────────────────────────────────────────────
+function updateKPIs() {
+  // Last non-null values
+  var lastJet    = null, prevJet = null, lastSaf = null, lastSpread = null, maxSpread = 0;
+  for (var i = JET.length - 1; i >= 0; i--) {
+    if (lastJet    === null && JET[i]    !== null) { lastJet    = JET[i]; }
+    if (lastJet    !== null && prevJet   === null && JET[i] !== null && i < JET.length - 1) { prevJet = JET[i]; }
+    if (lastSaf    === null && SAF[i]    !== null) { lastSaf    = SAF[i]; }
+    if (lastSpread === null && SPREAD[i] !== null) { lastSpread = SPREAD[i]; }
+  }
+  for (var j = 0; j < SPREAD.length; j++) {
+    if (SPREAD[j] !== null && SPREAD[j] > maxSpread) maxSpread = SPREAD[j];
+  }
+
+  if (lastJet !== null) {
     document.getElementById('kpi-jet-val').textContent   = '$' + lastJet.toLocaleString();
-    const delta = prevJet !== undefined ? lastJet - prevJet : 0;
+    var delta = prevJet !== null ? lastJet - prevJet : 0;
     document.getElementById('kpi-jet-delta').textContent = (delta >= 0 ? '+' : '') + delta + ' vs prev month';
   }
-  if (lastSaf !== undefined) {
-    document.getElementById('kpi-saf-val').textContent = '$' + lastSaf.toLocaleString();
-  //   const marginTxt = currentMargin > 0 ? ` + ${currentMargin}% margin` : ' (MSP floor)';
-    document.getElementById('kpi-saf-label').textContent = `${currentPathway} SAF MSP ($/t)`;
-    document.getElementById('leg-saf-label').textContent = `${currentPathway} SAF MSP $/t (IATA)`;
+  if (lastSaf !== null) {
+    document.getElementById('kpi-saf-val').textContent   = '$' + lastSaf.toLocaleString();
+    document.getElementById('kpi-saf-label').textContent = currentPathway + ' SAF MSP ($/t)';
+    document.getElementById('leg-saf-label').textContent = currentPathway + ' SAF MSP $/t (IATA)';
   }
-  if (lastSpread !== undefined) {
-    document.getElementById('kpi-spread-val').textContent  = '$' + lastSpread.toLocaleString();
-    document.getElementById('kpi-spread-delta').textContent = '↓ from $' + maxSpread.toLocaleString() + ' peak';
+  if (lastSpread !== null) {
+    document.getElementById('kpi-spread-val').textContent   = '$' + lastSpread.toLocaleString();
+    document.getElementById('kpi-spread-delta').textContent = maxSpread > 0 ? '↓ from $' + maxSpread.toLocaleString() + ' peak' : '';
   }
 }
 
 // ── PRICE CHART ──────────────────────────────────────────────────────────────
-let priceChart  = null;
-let currentView = 'both';
+function drawChart() {
+  if (chart) { chart.destroy(); chart = null; }
 
-function buildPriceDatasets(view) {
-  const carbon = LABELS.map(lbl => {
-    // Reverse label back to YYYY-MM key for lookup
-    const months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-    const [mon, yr] = lbl.split(' ');
-    const key = '20' + yr + '-' + months[mon];
-    return CARBON_MAP[key] ?? null;
-  });
-
-  const ds = [];
-  if (view !== 'spread') {
-    ds.push({label:'Jet A-1',data:JET,borderColor:'#4a9eca',backgroundColor:'transparent',tension:0.3,borderWidth:2,pointRadius:0,spanGaps:true});
-    ds.push({label:`${currentPathway} SAF MSP`,data:SAF,borderColor:'#2dd4a0',backgroundColor:'transparent',tension:0.3,borderWidth:2,pointRadius:0,spanGaps:true});
+  // Y-axis: scale to visible data only — ignore nulls
+  var allVals = [];
+  if (currentView !== 'spread') {
+    JET.forEach(function(v) { if (v !== null) allVals.push(v); });
+    SAF.forEach(function(v) { if (v !== null) allVals.push(v); });
   }
-  ds.push({label:'SAF premium',data:SPREAD,borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.06)',fill:true,tension:0.3,borderWidth:2,borderDash:[6,3],pointRadius:0,spanGaps:true});
-  if (view === 'carbon') {
-    ds.push({label:'UK ETS $/t CO\u2082',data:carbon,borderColor:'#9b8fef',backgroundColor:'rgba(155,143,239,0.06)',fill:true,tension:0.3,borderWidth:2,borderDash:[3,3],pointRadius:0,yAxisID:'y2',spanGaps:true});
-  }
-  return ds;
-}
+  SPREAD.forEach(function(v) { if (v !== null) allVals.push(v); });
 
-function buildPriceChart(view) {
-  if (priceChart) priceChart.destroy();
+  var yMin = allVals.length ? Math.floor(Math.min.apply(null, allVals) / 100) * 100 : 0;
+  var yMax = allVals.length ? Math.ceil( Math.max.apply(null, allVals) / 100) * 100 + 200 : 3000;
+  yMin = Math.max(0, yMin - 100);
 
-  const showY2 = view === 'carbon';
-  document.getElementById('leg-carbon').style.display = showY2 ? 'flex' : 'none';
-
-  // Show approximately 14 date labels to avoid crowding
-  const tickStep = Math.max(1, Math.floor(LABELS.length / 14));
-
-  // Determine the data currently being displayed
-  const datasets = buildPriceDatasets(view);
-
-  // Collect all visible Y-axis values
-  const yValues = [];
-
-  datasets.forEach(ds => {
-    // Carbon has its own Y2 axis
-    if (ds.yAxisID === 'y2') return;
-
-    ds.data.forEach(value => {
-      if (value !== null && Number.isFinite(value)) {
-        yValues.push(value);
-      }
+  var datasets = [];
+  if (currentView !== 'spread') {
+    datasets.push({
+      label: 'Jet A-1',
+      data: JET,
+      borderColor: '#4a9eca',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 0,
+      spanGaps: true
     });
+    datasets.push({
+      label: currentPathway + ' SAF MSP',
+      data: SAF,
+      borderColor: '#2dd4a0',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 0,
+      spanGaps: true
+    });
+  }
+  datasets.push({
+    label: 'SAF premium',
+    data: SPREAD,
+    borderColor: '#f5a623',
+    backgroundColor: 'rgba(245,166,35,0.07)',
+    borderWidth: 2,
+    borderDash: [6, 3],
+    fill: true,
+    tension: 0.3,
+    pointRadius: 0,
+    spanGaps: true
   });
 
-  // Calculate sensible Y-axis limits from the actual data
-  const minValue = yValues.length ? Math.min(...yValues) : 0;
-  const maxValue = yValues.length ? Math.max(...yValues) : 3000;
+  var tickStep = Math.max(1, Math.floor(LABELS.length / 14));
 
-  // Add 10% padding above and below the data range
-  const range = maxValue - minValue;
-  const padding = range > 0 ? range * 0.10 : maxValue * 0.10;
-
-  const yMin = Math.max(0, Math.floor((minValue - padding) / 100) * 100);
-  const yMax = Math.ceil((maxValue + padding) / 100) * 100;
-
-  priceChart = new Chart(document.getElementById('priceChart'), {
+  chart = new Chart(document.getElementById('priceChart'), {
     type: 'line',
-
-    data: {
-      labels: LABELS,
-      datasets: datasets
-    },
-
+    data: { labels: LABELS, datasets: datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 350 },
-
+      animation: { duration: 400 },
       plugins: {
         legend: { display: false },
-
         tooltip: {
           mode: 'index',
           intersect: false,
-
           backgroundColor: '#0f1e36',
           borderColor: 'rgba(255,255,255,0.15)',
           borderWidth: 1,
-
           titleColor: '#9ba3af',
           bodyColor: '#f0f0ef',
-
           callbacks: {
-            label: c =>
-              c.parsed.y !== null
-                ? '$' + c.parsed.y.toFixed(0) + '/t'
-                : 'n/a'
+            label: function(c) {
+              return c.parsed.y !== null ? '$' + c.parsed.y.toFixed(0) + '/t' : 'n/a';
+            }
           }
         }
       },
-
       scales: {
         x: {
           ticks: {
             color: TICK,
             font: { size: 10 },
             maxRotation: 45,
-
-            callback: (val, idx) =>
-              idx % tickStep === 0 ? LABELS[idx] : ''
+            callback: function(val, idx) { return idx % tickStep === 0 ? LABELS[idx] : ''; }
           },
-
-          grid: {
-            color: GRID
-          }
+          grid: { color: GRID }
         },
-
-        // Main price axis
         y: {
           min: yMin,
           max: yMax,
-
-          ticks: {
-            color: TICK,
-            font: { size: 10 },
-
-            callback: v => '$' + v.toLocaleString()
-          },
-
-          grid: {
-            color: GRID
-          }
-        },
-
-        // Secondary axis for UK ETS
-        ...(showY2 ? {
-          y2: {
-            ticks: {
-              color: '#9b8fef',
-              font: { size: 10 },
-
-              callback: v => '$' + v.toLocaleString()
-            },
-
-            grid: {
-              display: false
-            },
-
-            position: 'right'
-          }
-        } : {})
+          ticks: { color: TICK, font: { size: 10 }, callback: function(v) { return '$' + v; } },
+          grid: { color: GRID }
+        }
       }
     }
   });
 }
 
-function setPriceView(v, btn) {
-  currentView = v;
-  // Only deactivate view buttons, not pathway buttons
-  ['viewBtn-both','viewBtn-spread','viewBtn-carbon'].forEach(id => {
-    const el = document.getElementById(id);
+// ── CONTROLS ──────────────────────────────────────────────────────────────────
+function setPathway(pathway, btn) {
+  currentPathway = pathway;
+  ['HEFA','AtJ','FT','PtL'].forEach(function(p) {
+    var el = document.getElementById('pathBtn-' + p);
     if (el) el.classList.remove('active');
   });
   btn.classList.add('active');
-  buildPriceChart(v);
+  document.getElementById('pathway-note').textContent = PATHWAY_NOTES[pathway];
+  if (JET.length > 0) {
+    buildSAFandSpread();
+    updateKPIs();
+    drawChart();
+  }
 }
 
-// Rebuild SAF + SPREAD arrays and redraw when pathway changes
-function setPathway(pathway, btn) {
-  currentPathway = pathway;
-  document.querySelectorAll('.pathway-row .ctrl-btn, .controls .ctrl-btn[onclick^="setPathway"]').forEach(b => b.classList.remove('active'));
+function setView(v, btn) {
+  currentView = v;
+  ['viewBtn-both','viewBtn-spread'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
   btn.classList.add('active');
-  rebuildSAFAndRedraw();
+  drawChart();
 }
 
-// Rebuild SAF + SPREAD arrays and redraw when margin changes
-// function setMargin(val)
-//   currentMargin = parseInt(val);
-//   document.getElementById('marginDisplay').textContent = val + '%';
-//   rebuildSAFAndRedraw();
-
-// Shared rebuild: recalculate SAF and SPREAD from current EIA JET data, then redraw
-function rebuildSAFAndRedraw() {
-  if (JET.length === 0) return;
-  SAF    = LABELS.map(lbl => SAF_MAPS[currentPathway][labelToPeriod(lbl)] ?? null);
-  SPREAD = SAF.map((s, i) => s !== null && JET[i] !== null ? s - JET[i] : null);
-  updateKPIs();
-  buildPriceChart(currentView);
-}
-
-// Kick off EIA fetch on page load
-fetchEIAJetFuel();
+fetchEIA();
 
 // ── WATERFALL ──
 const WF_ITEMS = [
