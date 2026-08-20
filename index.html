@@ -43,6 +43,14 @@
   .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
   .ctrl-btn.active { background: rgba(74,158,202,0.15); border-color: var(--accent); color: var(--accent); }
 
+  .margin-control { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .margin-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .margin-val { font-size: 12px; font-weight: 600; color: var(--saf); min-width: 36px; font-variant-numeric: tabular-nums; }
+  input[type=range] { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--border-strong); outline: none; cursor: pointer; width: 140px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--saf); cursor: pointer; border: 2px solid var(--navy); }
+  .pathway-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .pathway-label { font-size: 11px; color: var(--text-muted); margin-right: 2px; }
+
   .pathway-note { font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 10px; }
 
   .legend { display: flex; gap: 20px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -99,6 +107,14 @@
     <button class="ctrl-btn"        id="pathBtn-PtL"  onclick="setPathway('PtL',this)">PtL</button>
   </div>
   <div class="pathway-note" id="pathway-note">HEFA (Hydroprocessed Esters &amp; Fatty Acids) — lowest-cost mature pathway, primarily UCO/tallow feedstock</div>
+
+  <!-- MARGIN CONTROL -->
+  <div class="margin-control">
+      <span class="margin-label">Producer margin above MSP:</span>
+      <input type="range" id="marginSlider" min="0" max="20" step="5" value="0" oninput="setMargin(this.value)">
+      <span class="margin-val" id="marginDisplay">0%</span>
+      <span class="margin-label" style="color:var(--text-muted);font-size:10px">(0% = IATA MSP floor · 10–20% = typical project return)</span>
+  </div>
 
   <!-- VIEW SELECTOR -->
   <div class="controls">
@@ -227,6 +243,7 @@ let SAF      = [];   // $/t from IATA MSP lookup
 let SPREAD   = [];   // SAF - JET
 let currentPathway = 'HEFA';
 let currentView    = 'both';
+let currentMargin  = 0;   // % above MSP
 let chart          = null;
 
 const GRID = 'rgba(255,255,255,0.06)';
@@ -293,7 +310,8 @@ async function fetchEIA() {
 // Build SAF and SPREAD from current PERIODS and JET
 function buildSAFandSpread() {
   var map = SAF_MAPS[currentPathway];
-  SAF    = PERIODS.map(function(p) { return map[p] !== undefined ? map[p] : null; });
+  var factor = 1 + currentMargin / 100; 
+  SAF    = PERIODS.map(function(p) { return map[p] !== undefined ? Math.round(map[p] * factor) : null; });
   SPREAD = PERIODS.map(function(p, i) {
     var s = SAF[i], j = JET[i];
     return (s !== null && j !== null) ? s - j : null;
@@ -438,6 +456,20 @@ function setPathway(pathway, btn) {
   });
   btn.classList.add('active');
   document.getElementById('pathway-note').textContent = PATHWAY_NOTES[pathway];
+  if (JET.length > 0) {
+    buildSAFandSpread();
+    updateKPIs();
+    drawChart();
+  }
+}
+
+function setMargin(pct, btn) {
+  currentMargin = pct;
+  [0, 5, 10, 15, 20].forEach(function(p) {
+    var el = document.getElementById('marginBtn-' + p);
+    if (el) el.classList.remove('active');
+  });
+  btn.classList.add('active');
   if (JET.length > 0) {
     buildSAFandSpread();
     updateKPIs();
