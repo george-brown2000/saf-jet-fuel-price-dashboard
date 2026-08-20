@@ -115,7 +115,7 @@
 
 <div class="main">
 
-  <!-- KPI ROW -->
+  <!-- KPI CARDS -->
   <div class="kpi-row">
     <div class="kpi">
       <div class="kpi-label">Jet A-1 ($/t)</div>
@@ -125,18 +125,18 @@
     <div class="kpi">
       <div class="kpi-label" id="kpi-saf-label">HEFA SAF MSP ($/t)</div>
       <div class="kpi-value" id="kpi-saf-val" style="color:var(--saf)">-</div>
-      <div class="kpi-delta up" id="kpi-saf-delta">indicative</div>
+      <div class="kpi-delta up" id="kpi-saf-delta">IATA MSP · indicative</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">SAF premium ($/t)</div>
       <div class="kpi-value" id="kpi-spread-val"style="color:var(--spread)">-</div>
       <div class="kpi-delta down" id="kpi-spread-delta">-</div>
     </div>
-    <div class="kpi">
+    <!-- <div class="kpi">
       <div class="kpi-label">UK ETS carbon ($/t CO₂)</div>
       <div class="kpi-value" style="color:var(--carbon)">$44</div>
       <div class="kpi-delta down">↓ from $104 peak (Jul 22)</div>
-    </div>
+    </div> -->
   </div>
 
   <!-- TABS -->
@@ -150,12 +150,13 @@
   <!-- TAB: PRICE HISTORY -->
   <div class="tab-panel active" id="tab-prices">
     <div class="controls" style="margin-bottom:6px">
-      <span class="pathway-label">Pathway:</span>
-      <button class="ctrl-btn active" onclick="setPathway('HEFA',this)">HEFA</button>
-      <button class="ctrl-btn" onclick="setPathway('AtJ',this)">AtJ</button>
-      <button class="ctrl-btn" onclick="setPathway('FT',this)">FT</button>
-      <button class="ctrl-btn" onclick="setPathway('PtL',this)">PtL</button>
+      <span class="ctrl-label">Pathway:</span>
+      <button class="ctrl-btn active" id="pathBtn-HEFA" onclick="setPathway('HEFA',this)">HEFA</button>
+      <button class="ctrl-btn" id="pathBtn-AtJ" onclick="setPathway('AtJ',this)">AtJ</button>
+      <button class="ctrl-btn" id="pathBtn-FT" onclick="setPathway('FT',this)">FT</button>
+      <button class="ctrl-btn" id="pathBtn-PtL" onclick="setPathway('PtL',this)">PtL</button>
     </div>
+    <div class="pathway-note" id="pathway-note">HEFA (Hydroprocessed Esters &amp; Fatty Acids) — lowest-cost mature pathway, primarily UCO/tallow feedstock</div>
     <!-- <div class="margin-control">
       <span class="margin-label">Producer margin above MSP:</span>
       <input type="range" id="marginSlider" min="0" max="25" step="5" value="0" oninput="setMargin(this.value)">
@@ -166,19 +167,19 @@
       <span class="ctrl-label">View:</span>
       <button class="ctrl-btn active" id="viewBtn-both" onclick="setPriceView('both',this)">Prices + spread</button>
       <button class="ctrl-btn" id="viewBtn-spread" onclick="setPriceView('spread',this)">Spread only</button>
-      <button class="ctrl-btn" id="viewBtn-carbon" onclick="setPriceView('carbon',this)">Carbon overlay</button>
+      <!-- <button class="ctrl-btn" id="viewBtn-carbon" onclick="setPriceView('carbon',this)">Carbon overlay</button> -->
     </div>
     <div class="legend">
       <div class="leg-item"><div class="leg-dot" style="background:var(--jet)"></div>Jet A-1 $/t (EIA live)</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--saf)"></div><span id="leg-saf-label">HEFA SAF MSP $/t (IATA)</span></div>
-      <div class="leg-item"><div class="leg-dot" style="background:var(--spread)"></div>SAF premium $/t</div>
-      <div class="leg-item" id="leg-carbon" style="display:none"><div class="leg-dot" style="background:var(--carbon)"></div>UK ETS $/t CO₂</div>
+      <div class="leg-item" id="leg-spread-item"><div class="leg-dot" style="background:var(--spread)"></div>SAF premium $/t</div>
     </div>
-    <div class="chart-wrap" id="priceChartWrap" style="height:260px;position:relative;"></div>
-      <canvas id="priceChart" role="img" aria-label="Time series of Jet A-1, HEFA SAF and SAF premium prices 2019 to 2025. SAF premium peaked in 2022 and has since narrowed."></canvas>
+    <div class="chart-wrap" id="chartWrap"></div>
+      <canvas id="priceChart"></canvas>
+      <div class="status" id="chartStatus" style="color:var(--text-muted)">Loading EIA data…</div>
     </div>
-    <div class="annotation" id="price-annotation">
-      SAF prices shown are IATA average Minimum Selling Price (MSP) — the modelled production cost floor for each pathway — linearly interpolated between 5-year anchor points (2020–2045). MSP represents the minimum price at which a producer breaks even; actual traded SAF prices are typically higher. Use the margin slider to apply a producer return assumption above MSP. Jet A-1 is a live EIA spot price (US Gulf Coast kerosene-type, converted to $/t at 800 kg/m³ density). The SAF premium is SAF (MSP + margin) minus Jet A-1. Sources: IATA (SAF MSP), US EIA (Jet A-1).
+    <div class="annotation">
+    SAF prices are IATA average Minimum Selling Price (MSP) — the modelled production cost floor for each pathway — linearly interpolated between 5-year anchor points (2020–2030). MSP is the minimum price at which a producer breaks even; actual traded SAF prices are typically higher. Jet A-1 is live EIA spot price (US Gulf Coast kerosene-type jet fuel, converted to $/t at an assumed density of 800 kg/m³). Sources: IATA (SAF MSP), US EIA series EER_EPJK_PF4_RGC_DPG (Jet A-1).
     </div>
   </div>
 
