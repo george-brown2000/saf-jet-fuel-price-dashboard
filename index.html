@@ -18,7 +18,6 @@
     --jet: #4a9eca;
     --saf: #2dd4a0;
     --spread: #f5a623;
-    --carbon: #9b8fef;
     --accent: #4a9eca;
     --radius: 6px;
   }
@@ -33,13 +32,21 @@
 
   .main { max-width: 1100px; margin: 0 auto; padding: 24px 28px 48px; }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
   .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
   .kpi-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
   .kpi-value { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 5px; }
   .kpi-delta { font-size: 11px; color: var(--text-muted); }
   .kpi-delta.down { color: #2dd4a0; }
   .kpi-delta.up { color: #f87171; }
+
+  .controls { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+  .ctrl-label { font-size: 11px; color: var(--text-muted); }
+  .ctrl-btn { font-size: 11px; padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ctrl-btn.active { background: rgba(74,158,202,0.15); border-color: var(--accent); color: var(--accent); }
+
+  .pathway-note { font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 10px; }
 
   .tab-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
   .tab { font-size: 12px; font-weight: 500; padding: 8px 18px; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; user-select: none; }
@@ -49,12 +56,6 @@
   .tab-panel.active { display: block; }
 
   .section-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
-
-  .controls { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
-  .ctrl-label { font-size: 11px; color: var(--text-muted); }
-  .ctrl-btn { font-size: 11px; padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; }
-  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .ctrl-btn.active { background: rgba(74,158,202,0.15); border-color: var(--accent); color: var(--accent); }
 
   /* .margin-control { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
   .margin-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
@@ -68,8 +69,8 @@
   .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
   .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
-  .chart-wrap { position: relative; width: 100%; }
-
+  .chart-wrap { position: relative; width: 100%; height: 320px; }
+  .status { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 12px; text-align: center; line-height: 1.6; max-width: 80%; pointer-events: none; }
   .annotation { background: rgba(74,158,202,0.07); border-left: 2px solid var(--accent); border-radius: 0 4px 4px 0; padding: 10px 14px; margin-top: 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 
   .wf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -265,7 +266,6 @@
 const EIA_SERIES_ID   = 'EER_EPJK_PF4_RGC_DPG';
 const EIA_API_KEY     = '8Bk8lUwOKdJO66ahH8FcnybpxsotxG0r3HEeLa4X';          // Replace with your free key from eia.gov/opendata
 
-// Jet fuel density assumption — change this value if you want to use a different density
 // 800 kg/m³ is the mid-point of the Jet A-1 ASTM D1655 density range (775–840 kg/m³)
 const JET_DENSITY_KG_PER_M3 = 800;          // kg/m³  ← configurable
 
