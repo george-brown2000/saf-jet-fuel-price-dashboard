@@ -109,12 +109,14 @@
   <div class="pathway-note" id="pathway-note">HEFA (Hydroprocessed Esters &amp; Fatty Acids) — lowest-cost mature pathway, primarily UCO/tallow feedstock</div>
 
   <!-- MARGIN CONTROL -->
-  <div class="margin-control">
-      <span class="margin-label">Producer margin above MSP:</span>
-      <input type="range" id="marginSlider" min="0" max="20" step="5" value="0" oninput="setMargin(this.value)">
-      <span class="margin-val" id="marginDisplay">0%</span>
-      <span class="margin-label" style="color:var(--text-muted);font-size:10px">(0% = IATA MSP floor · 10–20% = typical project return)</span>
-  </div>
+  <div class="controls">
+  <span class="ctrl-label">Producer margin above MSP:</span>
+  <button class="ctrl-btn active" id="marginBtn-0"  onclick="setMargin(0,this)">0%</button>
+  <button class="ctrl-btn"        id="marginBtn-5"  onclick="setMargin(5,this)">5%</button>
+  <button class="ctrl-btn"        id="marginBtn-10" onclick="setMargin(10,this)">10%</button>
+  <button class="ctrl-btn"        id="marginBtn-15" onclick="setMargin(15,this)">15%</button>
+  <button class="ctrl-btn"        id="marginBtn-20" onclick="setMargin(20,this)">20%</button>
+</div>
 
   <!-- VIEW SELECTOR -->
   <div class="controls">
