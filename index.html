@@ -593,6 +593,8 @@ function setView(v, btn) {
   drawChart();
 }
 
+fetchEIA();
+
 // ── Waterfall ──────────────────────────────────────────────────────────────────────
 const WF_ITEMS = [
   { label: 'Fossil Jet A-1 baseline', value: 750,  color: '#4a9eca', neg: false },
@@ -739,7 +741,6 @@ function switchTab(name) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-fetchEIA();
 </script>
 </body>
 </html>
