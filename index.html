@@ -592,9 +592,13 @@ function setView(v, btn) {
   btn.classList.add('active');
   drawChart();
 }
-
 fetchEIA();
 
+function setPriceView(v, btn) {
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildPriceChart(v);
+}
 // ── Waterfall ──────────────────────────────────────────────────────────────────────
 const WF_ITEMS = [
   { label: 'Fossil Jet A-1 baseline', value: 750,  color: '#4a9eca', neg: false },
