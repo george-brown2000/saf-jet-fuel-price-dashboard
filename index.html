@@ -302,7 +302,7 @@
       <button class="proc-btn" id="procBtn-FT" onclick="setProc('FT',this)">FT</button>
       <button class="proc-btn" id="procBtn-PtL" onclick="setProc('PtL',this)">PtL</button>
     </div>
-    </div class ="pathway-definition" id="pathway-definition">HEFA (Hydroprocessed Esters &amp; Fatty Acids) — hydroprocessing of oils and fats</div>
+    </div class ="pathway-definition" id="pathway-definition">HEFA (Hydroprocessed Esters & Fatty Acids) — hydroprocessing of lipid feedstocks (UCO, tallow, PFAD) to produce paraffinic jet fuel</div>
 
     <!-- HEFA -->
     <div class="proc-panel active" id="proc-HEFA">
@@ -1171,13 +1171,15 @@ function setProc(pathway, btn) {
   btn.classList.add('active');
   var active = document.getElementById('proc-' + pathway);
   if (active) active.classList.add('active');
+  var def = document.getElementById('proc-definition');
+  if (def) def.textContent = PATHWAY_DEFINITION[pathway];
 }
 
 const PATHWAY_DEFINITION = {
-  HEFA: 'HEFA (Hydroprocessed Esters & Fatty Acids) — hydroprocessing of oils and fats',
-  AtJ:  'AtJ (Alcohol-to-Jet) — conversion of alcohols to jet-fuel hydrocarbons',
-  FT:   'FT (Fischer-Tropsch) — gasification of biomass/waste to syngas, followed by synthesis',
-  PtL:  'PtL (Power-to-Liquid) — production of hydrocarbons from electrolytic hydrogen + captured CO₂',
+  HEFA: 'HEFA (Hydroprocessed Esters & Fatty Acids) — hydroprocessing of lipid feedstocks (UCO, tallow, PFAD) to produce paraffinic jet fuel',
+  AtJ:  'AtJ (Alcohol-to-Jet) — fermentation of sugars or cellulosic biomass to ethanol, followed by dehydration, oligomerisation and hydrogenation',
+  FT:   'FT (Fischer-Tropsch) — gasification of biomass or waste to syngas (H₂ + CO), followed by catalytic synthesis to liquid hydrocarbons',
+  PtL:  'PtL (Power-to-Liquid) — electrolytic green hydrogen combined with captured CO₂ via reverse water-gas shift and Fischer-Tropsch synthesis',
 };
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
