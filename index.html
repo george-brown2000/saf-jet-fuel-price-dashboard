@@ -184,11 +184,12 @@
     </div>
 
     <div class="footer">
-    All prices USD ($/t). Jet A-1 density assumption: 800 kg/m³ (mid-point of ASTM D1655 range, configurable in code).
-    SAF MSP: IATA 5-year anchor points 2020–2030, linearly interpolated monthly. MSP is a cost floor; actual traded prices may be higher.<br><br>
-    Built by George Brown · Chemical engineer, CCUS/SAF/Industrial Decarbonisation·
-    <a href="https://linkedin.com/in/george-brown2000" target="_blank">LinkedIn</a> ·
-    <a href="https://github.com/george-brown2000" target="_blank">GitHub</a>
+      All prices USD ($/t). Jet A-1 density assumption: 800 kg/m³ (mid-point of ASTM D1655 range, configurable in code).
+      SAF MSP: IATA 5-year anchor points 2020–2030, linearly interpolated monthly. MSP is a cost floor; actual traded prices may be higher.<br><br>
+      Built by George Brown · Chemical engineer, CCUS/SAF/Industrial Decarbonisation·
+      <a href="https://linkedin.com/in/george-brown2000" target="_blank">LinkedIn</a> ·
+      <a href="https://github.com/george-brown2000" target="_blank">GitHub</a>
+    </div>
   </div>
 
   <!-- TAB: COST STRUCTURE -->
@@ -611,15 +612,15 @@ const WF_ITEMS = [
 ];
 const WF_MAX = 900;
 
-function renderWaterfall() {
+(function renderWaterfall() {
   const c = document.getElementById('waterfall-container');
   c.innerHTML = WF_ITEMS.map((item, i) => {
     if (i === 4) return '<hr class="wf-divider">' + wfRow(item);
     return wfRow(item);
   }).join('');
-}
+})();
 
-function wfRow(item) {
+(function wfRow(item) {
   const w = Math.round((item.value / WF_MAX) * 100);
   const prefix = item.neg ? '− ' : '';
   return `<div class="wf-row">
@@ -631,7 +632,7 @@ function wfRow(item) {
     </div>
     <div class="wf-val" style="${item.bold ? 'font-weight:600' : ''}">${prefix}$${item.value}</div>
   </div>`;
-}
+})();
 
 // ── MANDATE ──────────────────────────────────────────────────────────────────────
 const MANDATE = [
@@ -647,7 +648,7 @@ const MANDATE = [
 ];
 const MMAX = 10;
 
-function renderMandate() {
+(function renderMandate() {
   const c = document.getElementById('mandate-container');
   c.innerHTML = MANDATE.map(m => {
     const tw = (m.target / MMAX * 100).toFixed(1);
@@ -661,7 +662,7 @@ function renderMandate() {
       <div class="mb-pct">${m.target.toFixed(1)}%${m.actual ? ` / <span style="color:#2dd4a0">${m.actual}%</span>` : ''}</div>
     </div>`;
   }).join('');
-}
+})();
 
 // ── SCENARIOS ──────────────────────────────────────────────────────────────────────
 const SCEN_YEARS = ['2025','2026','2027','2028','2029','2030'];
@@ -741,9 +742,10 @@ function switchTab(name) {
   const names = ['prices','cost','mandate','scenario'];
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+  if (name === 'scenario' && !scenChart) renderScenario();
   if (name === 'cost') {renderWaterfall();}
   if (name === 'mandate') {renderMandate();}
-  if (name === 'scenario') {renderScenario();} 
+   
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 </script>
