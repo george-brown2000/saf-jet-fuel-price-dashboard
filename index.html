@@ -59,6 +59,7 @@
   .pathway-label { font-size: 11px; color: var(--text-muted); margin-right: 2px; }
 
   .pathway-note { font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 10px; }
+  .pathway-definition { font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 10px; }
 
   .section-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
 
@@ -301,6 +302,7 @@
       <button class="proc-btn" id="procBtn-FT" onclick="setProc('FT',this)">FT</button>
       <button class="proc-btn" id="procBtn-PtL" onclick="setProc('PtL',this)">PtL</button>
     </div>
+    </div class ="pathway-definition" id="pathway-definition">HEFA (Hydroprocessed Esters &amp; Fatty Acids) — hydroprocessing of oils and fats</div>
 
     <!-- HEFA -->
     <div class="proc-panel active" id="proc-HEFA">
@@ -1167,9 +1169,15 @@ function setProc(pathway, btn) {
     if (panel) panel.classList.remove('active');
   });
   btn.classList.add('active');
-  var active = document.getElementById('proc-' + pathway);
-  if (active) active.classList.add('active');
+  document.getElementById('pathway-definition').textContent = PATHWAY_DEFINITION[pathway];
 }
+
+const PATHWAY_DEFINITION = {
+  HEFA: 'HEFA (Hydroprocessed Esters & Fatty Acids) — hydroprocessing of oils and fats',
+  AtJ:  'AtJ (Alcohol-to-Jet) — conversion of alcohols to jet-fuel hydrocarbons',
+  FT:   'FT (Fischer-Tropsch) — gasification of biomass/waste to syngas, followed by synthesis',
+  PtL:  'PtL (Power-to-Liquid) — production of hydrocarbons from electrolytic hydrogen + captured CO₂',
+};
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 </script>
