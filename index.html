@@ -183,13 +183,6 @@
     SAF prices are IATA average Minimum Selling Price (MSP) — the modelled production cost floor for each pathway — linearly interpolated between 5-year anchor points (2020–2030). MSP is the minimum price at which a producer breaks even; actual traded SAF prices are typically higher. Jet A-1 is live EIA spot price (US Gulf Coast kerosene-type jet fuel, converted to $/t at an assumed density of 800 kg/m³). Sources: IATA (SAF MSP), US EIA series EER_EPJK_PF4_RGC_DPG (Jet A-1).
     </div>
 
-    <div class="footer">
-      All prices USD ($/t). Jet A-1 density assumption: 800 kg/m³ (mid-point of ASTM D1655 range, configurable in code).
-      SAF MSP: IATA 5-year anchor points 2020–2030, linearly interpolated monthly. MSP is a cost floor; actual traded prices may be higher.<br><br>
-      Built by George Brown · Chemical engineer, CCUS/SAF/Industrial Decarbonisation·
-      <a href="https://linkedin.com/in/george-brown2000" target="_blank">LinkedIn</a> ·
-      <a href="https://github.com/george-brown2000" target="_blank">GitHub</a>
-    </div>
   </div>
 
   <!-- TAB: COST STRUCTURE -->
@@ -257,6 +250,14 @@
       <canvas id="scenChart" role="img" aria-label="SAF premium scenario projections to 2030 under different carbon and mandate assumptions"></canvas>
     </div>
     <div class="annotation" id="scen-annotation"></div>
+  </div>
+
+  <div class="footer">
+    All prices USD ($/t). Jet A-1 density assumption: 800 kg/m³ (mid-point of ASTM D1655 range, configurable in code).
+    SAF MSP: IATA 5-year anchor points 2020–2030, linearly interpolated monthly. MSP is a cost floor; actual traded prices may be higher.<br><br>
+    Built by George Brown · Chemical engineer, CCUS/SAF/Industrial Decarbonisation·
+    <a href="https://linkedin.com/in/george-brown2000" target="_blank">LinkedIn</a> ·
+    <a href="https://github.com/george-brown2000" target="_blank">GitHub</a>
   </div>
 
 </div>
@@ -615,7 +616,7 @@ const WF_MAX = 900;
   }).join('');
 })();
 
-(function wfRow(item) {
+function wfRow(item) {
   const w = Math.round((item.value / WF_MAX) * 100);
   const prefix = item.neg ? '− ' : '';
   return `<div class="wf-row">
@@ -627,7 +628,7 @@ const WF_MAX = 900;
     </div>
     <div class="wf-val" style="${item.bold ? 'font-weight:600' : ''}">${prefix}$${item.value}</div>
   </div>`;
-})();
+}
 
 // ── MANDATE ──────────────────────────────────────────────────────────────────────
 const MANDATE = [
