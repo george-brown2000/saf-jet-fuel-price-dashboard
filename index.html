@@ -1169,7 +1169,8 @@ function setProc(pathway, btn) {
     if (panel) panel.classList.remove('active');
   });
   btn.classList.add('active');
-  document.getElementById('pathway-definition').textContent = PATHWAY_DEFINITION[pathway];
+  var active = document.getElementById('pathway-definition').textContent = PATHWAY_DEFINITION[pathway];
+  if (active) active.classList.add('active');
 }
 
 const PATHWAY_DEFINITION = {
