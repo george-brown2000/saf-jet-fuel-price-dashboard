@@ -1169,7 +1169,7 @@ function setProc(pathway, btn) {
     if (panel) panel.classList.remove('active');
   });
   btn.classList.add('active');
-  var active = document.getElementById('pathway-definition').textContent = PATHWAY_DEFINITION[pathway];
+  var active = document.getElementById('proc-' + pathway);
   if (active) active.classList.add('active');
 }
 
