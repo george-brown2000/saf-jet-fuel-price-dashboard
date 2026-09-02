@@ -1156,7 +1156,19 @@ function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
   if (name === 'scenario' && !scenChart) renderScenario();
 }
-   
+
+// ── PROCESS TAB ──────────────────────────────────────────────────────────────
+function setProc(pathway, btn) {
+  ['HEFA','AtJ','FT','PtL'].forEach(function(p) {
+    var b = document.getElementById('procBtn-' + p);
+    var panel = document.getElementById('proc-' + p);
+    if (b) b.classList.remove('active');
+    if (panel) panel.classList.remove('active');
+  });
+  btn.classList.add('active');
+  var active = document.getElementById('proc-' + pathway);
+  if (active) active.classList.add('active');
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 </script>
