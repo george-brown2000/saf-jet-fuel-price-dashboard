@@ -595,11 +595,6 @@ function setView(v, btn) {
 }
 fetchEIA();
 
-function setPriceView(v, btn) {
-  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  buildPriceChart(v);
-}
 // ── Waterfall ──────────────────────────────────────────────────────────────────────
 const WF_ITEMS = [
   { label: 'Fossil Jet A-1 baseline', value: 750,  color: '#4a9eca', neg: false },
@@ -743,8 +738,7 @@ function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
   if (name === 'scenario' && !scenChart) renderScenario();
-  if (name === 'cost') {renderWaterfall();}
-  if (name === 'mandate') {renderMandate();}
+}
    
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
